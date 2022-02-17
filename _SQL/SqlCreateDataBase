@@ -1,0 +1,39 @@
+CREATE TABLE DRUZYNA (
+                         ID 		int NOT NULL IDENTITY,
+                         NAZWA_DRUZYNY 	varchar2(255) UNIQUE,
+                         PRIMARY KEY (ID)
+);
+
+CREATE TABLE MECZ (
+                      ID 		int NOT NULL IDENTITY,
+                      DATA_ROZPOCZECIA DATETIME,
+                      MIASTO		varchar2(255),
+                      DRUZYNA1	int,
+                      DRUZYNA2	int,
+                      PRIMARY KEY (ID),
+                      FOREIGN KEY (DRUZYNA1) REFERENCES DRUZYNA(ID),
+                      FOREIGN KEY (DRUZYNA2) REFERENCES DRUZYNA(ID),
+                      CONSTRAINT TAKIE_SAME_DRUZYNY CHECK(MECZ.DRUZYNA1!=MECZ.DRUZYNA2)
+    );
+
+CREATE TABLE ZAKLAD (
+                        ID 		int NOT NULL IDENTITY,
+                        MECZ_ID 	int,
+                        UZYTKOWNIK_NAME	varchar2(32) NOT NULL,
+                        UZYTKOWNIK_PIN	varchar2(4) NOT NULL,
+                        DRUZYNA1_GOLE	varchar2(2),
+                        DRUZYNA2_GOLE	varchar2(2),
+                        DATA_ZAKLADU	DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        PRIMARY KEY (ID),
+                        FOREIGN KEY (MECZ_ID) REFERENCES MECZ(ID),
+                        CONSTRAINT NIEZNANE_ZNAKI_PIN CHECK (UZYTKOWNIK_PIN not like '%[^0-9]%'),
+                        CONSTRAINT DLUGOSC_PINU CHECK(CHAR_LENGTH(UZYTKOWNIK_PIN)=4),
+                        CONSTRAINT NIEZNANE_ZNAKI_GOL1 CHECK (DRUZYNA1_GOLE not like '%[^0-9]%'),
+                        CONSTRAINT NIEZNANE_ZNAKI_GOL2 CHECK (DRUZYNA2_GOLE not like '%[^0-9]%'),
+);
+
+ALTER TABLE MECZ
+    ADD CONSTRAINT DRUZYNA1_ZAJETA UNIQUE(DATA_ROZPOCZECIA, DRUZYNA1);
+
+ALTER TABLE MECZ
+    ADD CONSTRAINT DRUZYNA2_ZAJETA UNIQUE(DATA_ROZPOCZECIA, DRUZYNA2);
